@@ -5,8 +5,8 @@
   "author": "danielwpz <danielwpz@gmail.com>",
   "scripts": {
     "start": "node index.js",
-    "build:docker": "docker build -t danielwpz/bh-alert:$npm_package_version .",
-    "publish:docker": "docker push danielwpz/bh-alert:$npm_package_version",
+    "build:docker": "docker build -t danielwpz/bh-alert:$npm_package_version . && docker tag danielwpz/bh-alert:$npm_package_version danielwpz/bh-alert:latest",
+    "publish:docker": "docker push danielwpz/bh-alert:$npm_package_version && docker push danielwpz/bh-alert:latest",
     "postversion": "git push origin master && git push origin --tags && npm run build:docker && npm run publish:docker"
   },
   "dependencies": {
