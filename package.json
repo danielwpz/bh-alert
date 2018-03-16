@@ -4,7 +4,10 @@
   "description": "",
   "author": "danielwpz <danielwpz@gmail.com>",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "build:docker": "docker build -t danielwpz/bh-alert:$npm_package_version .",
+    "publish:docker": "docker push danielwpz/bh-alert:$npm_package_version",
+    "postversion": "git push && git push --tags && npm run build:docker && npm run publish:docker"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
