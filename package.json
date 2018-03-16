@@ -1,0 +1,22 @@
+{
+  "name": "bh-alert",
+  "version": "0.0.0",
+  "description": "",
+  "author": "danielwpz <danielwpz@gmail.com>",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "express": "^4.16.3",
+    "lib": "^3.0.2",
+    "lodash": "^4.17.5",
+    "moment": "^2.21.0",
+    "moment-timezone": "^0.5.14",
+    "node-cron": "^1.2.1",
+    "request": "^2.85.0",
+    "request-promise": "^4.2.2",
+    "url-join": "^4.0.0"
+  },
+  "private": true
+}
