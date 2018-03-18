@@ -47,6 +47,14 @@ function parseProductName(rawString) {
     .join(' ');
 }
 
+function statusNotEqual(a, b) {
+  if (!a || !b) {
+    return false;
+  }
+
+  return a.status !== b.status;
+}
+
 async function notifySMS(productStatus) {
   const message = buildSMS(productStatus);
 
@@ -83,28 +91,33 @@ let pastStatus = {};
 async function doNotify() {
   console.log('Checking status...');
 
-  const latestStatus = await queryAll();
-  let productsNeedsNotify = [];
+  try {
+    const latestStatus = await queryAll();
+    let productsNeedsNotify = [];
 
-  latestStatus.forEach(s => {
-    // if it's the first time we saw this product and it's available OR
-    // the status of this product has changed
-    // we do notify
-    if ((!pastStatus[s.id] && s.available) || s.status !== _.last(pastStatus[s.id]).status) {
-      productsNeedsNotify.push(s);
+    latestStatus.forEach(s => {
+      // if it's the first time we saw this product and it's available OR
+      // the status of this product has changed
+      // we do notify
+      if ((!pastStatus[s.id] && s.available) || statusNotEqual(s, _.last(pastStatus[s.id]))) {
+        productsNeedsNotify.push(s);
+      }
+
+      // push latest status
+      pastStatus[s.id] = pastStatus[s.id] || [];
+      pastStatus[s.id].push(s);
+    });
+
+    if (productsNeedsNotify.length > 0) {
+      console.log(`${productsNeedsNotify.length} products need to be notified:`);
+      console.log(productsNeedsNotify.map(p => p.product));
+      await notifySMS(productsNeedsNotify);
+    } else {
+      console.log('No product to be notified');
     }
-
-    // push latest status
-    pastStatus[s.id] = pastStatus[s.id] || [];
-    pastStatus[s.id].push(s);
-  });
-
-  if (productsNeedsNotify.length > 0) {
-    console.log(`${productsNeedsNotify.length} products need to be notified:`);
-    console.log(productsNeedsNotify.map(p => p.product));
-    await notifySMS(productsNeedsNotify);
-  } else {
-    console.log('No product to be notified');
+  }catch (e) {
+    console.log(e);
+    console.log(e.stack);
   }
 }
 
