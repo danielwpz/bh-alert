@@ -15,3 +15,8 @@ List of product IDs and subscriber phone numbers are configured in `config.js`
         
 1. `npm i`    
 2. `STDLIB_TOKEN=YOUR_TOKEN npm run start`
+
+## Deploy
+> Make sure you have `docker`, `nomad`, `aws-cli` locally installed. And for AWS, you'll need a credential which has access to SQS deploy queue configured in `deploy.sh`        
+      
+`npm version VERSION`
