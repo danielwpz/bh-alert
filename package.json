@@ -7,7 +7,9 @@
     "start": "node index.js",
     "build:docker": "docker build -t danielwpz/bh-alert:$npm_package_version . && docker tag danielwpz/bh-alert:$npm_package_version danielwpz/bh-alert:latest",
     "publish:docker": "docker push danielwpz/bh-alert:$npm_package_version && docker push danielwpz/bh-alert:latest",
-    "postversion": "git push origin master && git push origin --tags && npm run build:docker && npm run publish:docker"
+    "deploy": "deploy.sh",
+    "preversion": "which aws && which docker && which nomad",
+    "postversion": "git push origin master && git push origin --tags && npm run build:docker && npm run publish:docker && npm run deploy"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
