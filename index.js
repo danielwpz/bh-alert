@@ -26,12 +26,16 @@ async function query(productId) {
   const notStockStatus = $('span[data-selenium=notStock]').text();
   const stockStatus = inStockStatus || notStockStatus;
 
-  return {
-    id: productId,
-    product: productName,
-    available: !!inStockStatus,
-    status: stockStatus
-  };
+  if (productName && stockStatus) {
+    return {
+      id: productId,
+      product: productName,
+      available: !!inStockStatus,
+      status: stockStatus
+    };
+  }
+
+  return null;
 }
 
 async function queryAll() {
@@ -92,7 +96,7 @@ async function doNotify() {
   console.log('Checking status...');
 
   try {
-    const latestStatus = await queryAll();
+    const latestStatus = (await queryAll()).filter(s => !!s);
     let productsNeedsNotify = [];
 
     latestStatus.forEach(s => {
