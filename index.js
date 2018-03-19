@@ -48,7 +48,7 @@ function parseProductName(rawString) {
 }
 
 function statusNotEqual(a, b) {
-  if (!a || !b) {
+  if (!a || !b || !a.status || !b.status) {
     return false;
   }
 
@@ -105,7 +105,9 @@ async function doNotify() {
 
       // push latest status
       pastStatus[s.id] = pastStatus[s.id] || [];
-      pastStatus[s.id].push(s);
+      if (s.status) {
+        pastStatus[s.id].push(s);
+      }
     });
 
     if (productsNeedsNotify.length > 0) {
