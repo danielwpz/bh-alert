@@ -4,6 +4,7 @@ const rp = require('request-promise');
 const express = require('express');
 const cheerio = require('cheerio');
 const cron = require('node-cron');
+const Promise = require('bluebird');
 const urlJoin = require('url-join');
 const moment = require('moment-timezone');
 const _ = require('lodash');
@@ -15,27 +16,39 @@ const app = express();
 async function query(productId) {
   const productUrl = urlJoin(config.bh_base_url, productId);
 
-  const $ = await rp({
-    uri: productUrl,
-    transform: cheerio.load
-  });
+  try {
+    const $ = await rp({
+      uri: productUrl,
+      transform: cheerio.load
+    });
 
-  const productName = parseProductName($('h1.pProductName').text());
+    const productName = parseProductName($('h1.pProductName').text());
 
-  const inStockStatus = $('span[data-selenium=inStock]').text();
-  const notStockStatus = $('span[data-selenium=notStock]').text();
-  const stockStatus = inStockStatus || notStockStatus;
+    const inStockStatus = $('span[data-selenium=inStock]').text();
+    const notStockStatus = $('span[data-selenium=notStock]').text();
+    const stockStatus = inStockStatus || notStockStatus;
 
-  return {
-    id: productId,
-    product: productName,
-    available: !!inStockStatus,
-    status: stockStatus
-  };
+    if (productName && stockStatus) {
+      return {
+        id: productId,
+        product: productName,
+        available: !!inStockStatus,
+        status: stockStatus
+      };
+    }
+  } catch (e) {
+    console.log('Failed to fetch data for ', productId);
+    console.error(e);
+    console.error(e.stack);
+  }
+
+  return null;
 }
 
 async function queryAll() {
-  return Promise.all(config.products.map(query));
+  return Promise.map(config.products, productId => {
+    return query(productId);
+  }, { concurrency: 1 });
 }
 
 function parseProductName(rawString) {
@@ -81,6 +94,8 @@ function buildSMS(status) {
 // -- HTTP server --
 app.get('/status/health', (req, res) => res.json({ health: 'ok' }));
 
+app.get('/status/version', (req, res) => res.json({ version: process.env.npm_package_version }));
+
 app.get('/products', async (req, res) => res.json(await queryAll()));
 
 app.listen(config.port, () => console.log(`Listening at ${config.port}...`));
@@ -92,7 +107,7 @@ async function doNotify() {
   console.log('Checking status...');
 
   try {
-    const latestStatus = await queryAll();
+    const latestStatus = (await queryAll()).filter(s => !!s);
     let productsNeedsNotify = [];
 
     latestStatus.forEach(s => {
