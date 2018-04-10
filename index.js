@@ -38,8 +38,6 @@ async function query(productId) {
     }
   } catch (e) {
     console.log('Failed to fetch data for ', productId);
-    console.error(e);
-    console.error(e.stack);
   }
 
   return null;
@@ -47,7 +45,7 @@ async function query(productId) {
 
 async function queryAll() {
   return Promise.map(config.products, productId => {
-    return query(productId);
+    return Promise.resolve(query(productId)).delay(500);
   }, { concurrency: 1 });
 }
 
