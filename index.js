@@ -134,4 +134,4 @@ async function doNotify() {
   }
 }
 
-cron.schedule('* * * * *', doNotify);
+cron.schedule('*/2 * * * *', doNotify);
